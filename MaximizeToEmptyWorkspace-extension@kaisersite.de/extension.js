@@ -29,6 +29,13 @@ export default class Extension {
  
     constructor() {
     }
+
+    isWindowMaximized(win) {
+        // GNOME 49 replaced get_maximized() with is_maximized().
+        if (typeof win.is_maximized === 'function')
+            return win.is_maximized();
+        return win.get_maximized() === Meta.MaximizeFlags.BOTH;
+    }
     
     // First free workspace on the specified monitor
     getFirstFreeMonitor(manager,mMonitor) {
@@ -218,7 +225,7 @@ export default class Extension {
         //console.log("achim","window_manager_map "+win.get_id());
         if (win.window_type !== Meta.WindowType.NORMAL)
             return;
-        if (win.get_maximized() !== Meta.MaximizeFlags.BOTH)
+        if (!this.isWindowMaximized(win))
             return;
         if (win.is_always_on_all_workspaces())
             return;
@@ -245,7 +252,7 @@ export default class Extension {
         if (change === Meta.SizeChange.MAXIMIZE)
             {
             //console.log("achim","Meta.SizeChange.MAXIMIZE");
-            if (win.get_maximized() === Meta.MaximizeFlags.BOTH)
+            if (this.isWindowMaximized(win))
                 {
                 //console.log("achim","=== Meta.MaximizeFlags.BOTH");
                 _windowids_size_change[win.get_id()]="place";
@@ -270,7 +277,7 @@ export default class Extension {
         else if (change === Meta.SizeChange.UNFULLSCREEN)
             {
             //console.log("achim","change === Meta.SizeChange.UNFULLSCREEN");
-            if (win.get_maximized() !== Meta.MaximizeFlags.BOTH)
+            if (!this.isWindowMaximized(win))
                 {
                 //console.log("achim","!== Meta.MaximizeFlags.BOTH");
                 _windowids_size_change[win.get_id()]="back";
@@ -295,7 +302,7 @@ export default class Extension {
         //console.log("achim","window_manager_umminimize");
         if (win.window_type !== Meta.WindowType.NORMAL)
             return;
-        if (win.get_maximized() !== Meta.MaximizeFlags.BOTH)
+        if (!this.isWindowMaximized(win))
             return;
         if (win.is_always_on_all_workspaces())
             return;
